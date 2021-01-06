@@ -1,0 +1,90 @@
+`timescale 1ns/1ns
+
+
+module part1(SW, KEY, HEX0, HEX1);
+	input [9:0]SW; // SW[1] is enable, SW[0] is reset
+	input [3:0]KEY; // KEY[0] is clock
+	output [6:0] HEX0, HEX1;
+	wire [7:0] out;
+	wire [6:0] in;
+	
+	T_FF T0(.Clock(KEY[0]), .Clear_b(SW[0]), .T(SW[1]), .Q(out[0]));
+	
+	anding a0(.x(SW[1]), .y(out[0]), .z(in[0]));
+	T_FF T1(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[0]), .Q(out[1]));
+
+	anding a1(.x(in[0]), .y(out[1]), .z(in[1]));
+	T_FF T2(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[1]), .Q(out[2]));
+
+	anding a2(.x(in[1]), .y(out[2]), .z(in[2]));
+	T_FF T3(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[2]), .Q(out[3]));
+
+	anding a3(.x(in[2]), .y(out[3]), .z(in[3]));
+	T_FF T4(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[3]), .Q(out[4]));
+
+	anding a4(.x(in[3]), .y(out[4]), .z(in[4]));
+	T_FF T5(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[4]), .Q(out[5]));
+
+	anding a5(.x(in[4]), .y(out[5]), .z(in[5]));
+	T_FF T6(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[5]), .Q(out[6]));
+
+	anding a6(.x(in[5]), .y(out[6]), .z(in[6]));
+	T_FF T7(.Clock(KEY[0]), .Clear_b(SW[0]), .T(in[6]), .Q(out[7]));
+
+	segment7 s0(.X(out[3:0]), .hex(HEX0));
+	segment7 s1(.X(out[7:4]), .hex(HEX1));
+	
+endmodule	
+
+module T_FF(Clock, Clear_b, T, Q);
+	input Clock, Clear_b, T;
+	output reg Q;
+	reg xoring;
+	
+	always @ (*)
+	begin
+		xoring = T ^ Q;
+	end
+	
+	always@(posedge Clock)
+	begin
+		if(Clear_b == 1'b0) 
+			Q <= 1'b0;
+		else
+			Q <= xoring;
+	end
+endmodule
+
+module anding(x, y, z);
+	input x, y;
+	output z;
+	assign z = x & y;
+endmodule
+	
+module segment7(X, hex);
+	input[3:0]X;
+	output reg [6:0]hex;
+	
+	always @ (*)
+	begin
+		case(X)
+			4'b0000: hex = 7'b1000000;
+			4'b0001: hex = 7'b1111001;
+			4'b0010: hex = 7'b0100100;
+			4'b0011: hex = 7'b0110000;
+			4'b0100: hex = 7'b0011001;
+			4'b0101: hex = 7'b0010010;
+			4'b0110: hex = 7'b0000010;
+			4'b0111: hex = 7'b1111000;
+			4'b1000: hex = 7'b0000000;
+			4'b1001: hex = 7'b0010000;
+			4'b1010: hex = 7'b0001000;
+			4'b1011: hex = 7'b0000011;
+			4'b1100: hex = 7'b1000110;
+			4'b1101: hex = 7'b0100001;
+			4'b1110: hex = 7'b0000110;
+			4'b1111: hex = 7'b0001110;
+			default: hex = 7'b1000000;
+		endcase
+	end
+endmodule	

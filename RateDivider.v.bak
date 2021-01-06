@@ -1,0 +1,98 @@
+`timescale 1ps/1ps
+
+module part2(SW, HEX0, CLOCK_50);
+	input [9:0]SW;
+	input CLOCK_50;
+	output [6:0] HEX0;
+	wire [3:0] final_out;
+
+	wire enable;
+	//wire [30:0] in, out; //down counter input and output
+
+	//parallelLoad p0(.sel(SW[1:0]), .out(in));
+	
+	//countdown c0(.clk(CLOCK_50), .resetn(SW[9]), .rate(in), .count(out));
+
+	//compareWithZero c1(.in(out), .enable(enable));
+	
+	RateDivider r0(.iClock(CLOCK_50), .iSel(SW[1:0]), .iResetn(SW[9]), .oEnable(enable));
+	
+	counter c2(.clk(CLOCK_50), .resetn(SW[9]), .en(enable), .q(final_out));
+	
+	segment7 s0(.X(final_out), .hex(HEX0));
+
+endmodule
+
+module RateDivider(Clock, Sel, Resetn, Enable);
+	input [1:0] Sel;
+	input Clock, Resetn;
+	output Enable;
+	reg [27:0] rate, counter; // 28 bits gets you to 256M
+	
+	always @(posedge Clock) //determines rate of counting
+	begin
+		case (Sel)
+			2'b00: rate <= 1; //operate at full speed: 5 KHz / 5000 = 1
+			2'b01: rate <= 5000; //operate at 1 Hz: 5 KHz / 1 = 5000
+			2'b10: rate <= 10000; //operate at 0.5 Hz: 5 KHz / 0.5 = 10000
+			2'b11: rate <= 20000; //operate at 0.25 Hz: 5 KHz / 0.25 = 20000
+			default: rate <= 1;
+		endcase // case (Sel)
+	end
+	always @(posedge Clock)
+	begin
+		if(Resetn == 1'b0) //reset
+			counter <= rate-1;
+		else if(counter == 0) // enable turns on and counter resets
+			counter <= rate-1;
+		else //counts down
+			counter <= counter - 1;
+ 
+	end
+	
+	assign Enable = (counter == 0) ? 1'b1: 1'b0;
+endmodule
+
+module counter(clk, resetn, en, q);
+	input clk, resetn, en;
+	output reg [3:0] q; //4-bit counter
+	
+	always@(posedge clk)
+		begin
+			if(resetn == 1'b0)
+				q <= 0;
+			else if(q == 4'b1111) //counter should count from 0 to F,
+											// if reached F (hexadecimal), reset
+				q <= 0;
+			else if(en == 1'b1)
+				q <= q + 1;
+		end
+endmodule
+
+module segment7(X, hex);
+	input[3:0]X;
+	output reg [6:0]hex;
+	
+	always @(*)
+	begin
+		case(X)
+			4'b0000: hex = 7'b1000000;
+			4'b0001: hex = 7'b1111001;
+			4'b0010: hex = 7'b0100100;
+			4'b0011: hex = 7'b0110000;
+			4'b0100: hex = 7'b0011001;
+			4'b0101: hex = 7'b0010010;
+			4'b0110: hex = 7'b0000010;
+			4'b0111: hex = 7'b1111000;
+			4'b1000: hex = 7'b0000000;
+			4'b1001: hex = 7'b0010000;
+			4'b1010: hex = 7'b0001000;
+			4'b1011: hex = 7'b0000011;
+			4'b1100: hex = 7'b1000110;
+			4'b1101: hex = 7'b0100001;
+			4'b1110: hex = 7'b0000110;
+			4'b1111: hex = 7'b0001110;
+			default: hex = 7'b1000000;
+		endcase
+	end
+endmodule
