@@ -1,8 +1,16 @@
+`timescale 1ns / 1ps
+`default_nettype none
 
-module shift_register_12bit(input clk, enable, resetn, loadn,
-					input [11:0] data,
-					output out);
-	reg [11:0] Q = {12{1'b0}};
+module top(SW, LEDR);
+	input [9:0]SW;
+	output [9:0]LEDR;
+
+	shift_register_4bit u0(SW[9], SW[8], SW[7], SW[6], SW[3:0], LEDR[0]);
+
+endmodule
+
+module shift_register_4bit(input enable, clk, resetn, loadn, input [3:0]data, output out);
+	reg [3:0]Q = {4{1'b0}};
 	
 	always@(posedge clk) begin
 		if(resetn==0)
@@ -12,15 +20,7 @@ module shift_register_12bit(input clk, enable, resetn, loadn,
 		end
 		
 		else if(enable) begin
-			Q[11] <= 1'b0;
-			Q[10] <= Q[11];
-			Q[9] <= Q[10];
-			Q[8] <= Q[9];
-			Q[7] <= Q[8];
-			Q[6] <= Q[7];
-			Q[5] <= Q[6];
-			Q[4] <= Q[5];
-			Q[3] <= Q[4];
+			Q[3] <= 1'b0;
 			Q[2] <= Q[3];
 			Q[1] <= Q[2];
 			Q[0] <= Q[1];
