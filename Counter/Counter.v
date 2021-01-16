@@ -1,3 +1,13 @@
+`timescale 1ns / 1ps
+`default_nettype none
+
+module top(SW, LEDR);
+	input [9:0]SW;
+	output [9:0]LEDR;
+
+	counter u0(SW[9], SW[8], SW[0], LEDR[3:0]);
+
+endmodule
 
 module counter(clk, resetn, en, q);
 	input clk, resetn, en;
