@@ -1,3 +1,14 @@
+`timescale 1ns / 1ps
+`default_nettype none
+
+module top(SW, LEDR);
+    input [9:0]SW;
+    output [9:0]LEDR;
+    
+	mux2to1_2bit u0(SW[1:0], SW[3:2], SW[9], LEDR[1:0]);
+
+endmodule
+
 module mux2to1_2bit(x, y, s, m);
 	input [1:0]x, y;
 	input s;
