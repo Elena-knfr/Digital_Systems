@@ -1,5 +1,13 @@
+`timescale 1ns / 1ps
+`default_nettype none
 
-// positive edge triggered, synchronous active-low D-FF
+module top(SW, LEDR); 
+	input[9:0]SW;
+	output[9:0]LEDR;
+
+	PosEdge_SyncActiveLow u0(SW[0], SW[9], SW[1], LEDR[0]);
+
+endmodule
 
 module PosEdge_SyncActiveLow(d, clock, resetn, q);
     input d, clock, resetn;
