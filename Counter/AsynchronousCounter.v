@@ -1,8 +1,19 @@
 
+`timescale 1ns / 1ps
+`default_nettype none
+
+module top(SW, LEDR);
+	input [9:0]SW;
+	output [9:0]LEDR;
+
+	async_counter u0(SW[0], SW[9], SW[8], LEDR[2:0]);
+
+endmodule
+
 module async_counter(Enable, Clock, Resetn, Q);
 	 input Enable, Clock, Resetn;
 	 output [2:0] Q;
-    wire [2:0] C;
+    	 wire [2:0] C;
 	 
 	 T_FF t0(Clock, resetn, Enable, C[0]);
 	 T_FF t1(~C[0], resetn, Enable, C[1]);
