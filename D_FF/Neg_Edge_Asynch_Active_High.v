@@ -9,7 +9,6 @@ module top(SW, LEDR);
 
 endmodule
 
-
 module NegEdge_AsyncActiveHigh(d, clock, resetp, q);
     input d, clock, resetp;
     output reg q;
