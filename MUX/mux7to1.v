@@ -1,7 +1,18 @@
+`timescale 1ns / 1ps
+`default_nettype none
+
+module top(SW, LEDR);
+    input [9:0]SW;
+    output [9:0]LEDR;
+    
+	mux7to1 u0(SW[6:0], SW[9:8], LEDR[0]);
+
+endmodule
+
 module mux7to1(in, sel, out);
     input [6:0]in;
     input [2:0]sel; //select signal
-	 output reg out;
+    output reg out;
 	 
     always@(*)
         case(sel)
