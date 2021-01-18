@@ -1,13 +1,13 @@
 `timescale 1ps/1ps
 
 module MorseEncoder(input [2:0] SW,
-					input [1:0] KEY,
-					input CLOCK_50,
-					output [9:0] LEDR);
+		    input [1:0] KEY,
+		    input CLOCK_50,
+		    output [9:0] LEDR);
 					
-	parameter [13:0]  A = 12'b101110000000, B =12'b111010101000 , 
-							C = 12'b111010111010, D = 12'b111010100000, E = 12'b100000000000, 
-							F = 12'b101011101000, G = 12'b111011101000, H = 12'b101010100000;
+	parameter [13:0] A = 12'b101110000000, B =12'b111010101000 , 
+			 C = 12'b111010111010, D = 12'b111010100000, E = 12'b100000000000, 
+			 F = 12'b101011101000, G = 12'b111011101000, H = 12'b101010100000;
 	wire w2;
 	reg [11:0] w3;
 	
@@ -37,14 +37,14 @@ module RateDivider(Clock, Resetn, Enable);
 	
 	always @(posedge Clock)	//determines rate of counting
 	begin
-		rate <= 2500; //
+		rate <= 2500; 
 	end
 	always @(posedge Clock)
 	begin
 		if(Resetn == 1'b0) //reset
-			counter <= rate-1;
+			counter <= rate - 1;
 		else if(counter == 0) // enable turns on and counter resets
-			counter <= rate-1;
+			counter <= rate - 1;
 		else //counts down
 			counter <= counter - 1;
  
@@ -54,15 +54,15 @@ module RateDivider(Clock, Resetn, Enable);
 endmodule
 
 module shift_register_12bit(input clk, enable, resetn, loadn,
-					input [11:0] data,
-					output out);
+			    input [11:0] data, output out);
+	
 	reg [11:0] Q = {12{1'b0}};
 	
 	always@(posedge clk) begin
-		if(resetn==0)
-			Q<=0;
+		if(resetn == 0)
+			Q <= 0;
 		else if(loadn==0) begin
-			Q<=data;
+			Q <= data;
 		end
 		
 		else if(enable) begin
