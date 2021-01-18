@@ -1,3 +1,9 @@
+//To derive the slower flashing rates, should use a counter, call it RateDivider, which is
+//clocked with the 50 MHz clock. The output of RateDivider can be used as part of a circuit
+//to create pulses at the required rates.
+
+//Every time RateDivider has counted the appropriate
+//number of clock pulses, a pulse should be generated for one clock cycle.
 
 module RateDivider(Clock, Sel, Resetn, Enable);
 	input [1:0] Sel;
