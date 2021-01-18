@@ -1,4 +1,3 @@
-
 module segment7(X, hex);
 	input[3:0]X;
 	output reg [6:0]hex;
