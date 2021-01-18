@@ -1,16 +1,19 @@
 `timescale 1ns / 1ps
 
+//implement a datapath and a FSM that controls the datapath
+//so that it performs the computation:Ax2 + Bx + C
+
 module main(SW, KEY, CLOCK_50, LEDR, HEX0, HEX1);
-    input [9:0] SW;
-    input [3:0] KEY;
+    input [9:0]SW;
+    input [3:0]KEY;
     input CLOCK_50;
-    output [9:0] LEDR;
-    output [6:0] HEX0, HEX1;
+    output [9:0]LEDR;
+    output [6:0]HEX0, HEX1;
 
     wire resetn;
     wire go;
 
-    wire [7:0] data_result;
+    wire [7:0]data_result;
     assign go = ~KEY[1];
     assign resetn = KEY[0];
 
@@ -40,14 +43,14 @@ module wrapper(
     input clk,
     input resetn,
     input go,
-    input [7:0] data_in,
-    output [7:0] data_result
+    input [7:0]data_in,
+    output [7:0]data_result
     );
 
     // lots of wires to connect our datapath and control
     wire ld_a, ld_b, ld_c, ld_x, ld_r;
     wire ld_alu_out;
-    wire [1:0]  alu_select_a, alu_select_b;
+    wire [1:0]alu_select_a, alu_select_b;
     wire alu_op;
 
     control C0(
@@ -97,11 +100,11 @@ module control(
 
     output reg  ld_a, ld_b, ld_c, ld_x, ld_r,
     output reg  ld_alu_out,
-    output reg [1:0]  alu_select_a, alu_select_b,
+    output reg [1:0]alu_select_a, alu_select_b,
     output reg alu_op
     );
 
-    reg [5:0] current_state, next_state; 
+    reg [5:0]current_state, next_state; 
     
     localparam  S_LOAD_A        = 5'd0,
                 S_LOAD_A_WAIT   = 5'd1,
@@ -115,12 +118,12 @@ module control(
                 S_CYCLE_1       = 5'd9,
                 S_CYCLE_2       = 5'd10,
                 S_CYCLE_3       = 5'd11,
-		          S_CYCLE_4       = 5'd12;
+		S_CYCLE_4       = 5'd12;
 			 
     // Next state logic aka our state table
     always@(*)
     begin: state_table 
-            case (current_state)
+	case (current_state)
                 S_LOAD_X: next_state = go ? S_LOAD_X_WAIT : S_LOAD_X; // Loop in current state until value is input
                 S_LOAD_X_WAIT: next_state = go ? S_LOAD_X_WAIT : S_LOAD_A; // Loop in current state until go signal goes low
                 S_LOAD_A: next_state = go ? S_LOAD_A_WAIT : S_LOAD_A; // Loop in current state until value is input
@@ -131,11 +134,11 @@ module control(
                 S_LOAD_C_WAIT: next_state = go ? S_LOAD_C_WAIT : S_CYCLE_0; // Loop in current state until go signal goes low
                 S_CYCLE_0: next_state = S_CYCLE_1;
                 S_CYCLE_1: next_state = S_CYCLE_2;
-					 S_CYCLE_2: next_state = S_CYCLE_3;
-					 S_CYCLE_3: next_state = S_CYCLE_4;
+		S_CYCLE_2: next_state = S_CYCLE_3;
+		S_CYCLE_3: next_state = S_CYCLE_4;
                 S_CYCLE_4: next_state = S_LOAD_X; // we will be done our two operations, start over after
-					 default:     next_state = S_LOAD_X;
-				endcase
+		default: next_state = S_LOAD_X;
+	endcase
     end // state_table
    
 
@@ -151,59 +154,59 @@ module control(
         ld_r = 1'b0;
         alu_select_a = 2'b0;
         alu_select_b = 2'b0;
-        alu_op       = 1'b0;
+        alu_op = 1'b0;
 
         case (current_state)
             S_LOAD_A: begin
                 ld_a = 1'b1;
-                end
+            end
             S_LOAD_B: begin
                 ld_b = 1'b1;
-                end
+            end
             S_LOAD_C: begin
                 ld_c = 1'b1;
-                end
+            end
             S_LOAD_X: begin
                 ld_x = 1'b1;
-                end
-				// Do B <- B * X  //BX
+            end
+	    // Do B <- B * X  //BX
             S_CYCLE_0: begin 
                 ld_alu_out = 1'b1; ld_b = 1'b1;// store result back into B
                 alu_select_a = 2'b11; // Select register X
                 alu_select_b = 2'b01; // Also select register B
                 alu_op = 1'b1; // Do multiply operation
             end
-				// Do A <- A * X  //AX
+	    // Do A <- A * X  //AX
             S_CYCLE_1: begin 
                 ld_alu_out = 1'b1; // store result back into A   
-					 ld_a = 1'b1;
+		ld_a = 1'b1;
                 alu_select_a = 2'b00; // Select register A
                 alu_select_b = 2'b11; // Also select register X
                 alu_op = 1'b1; // Do multiply operation
             end
-				// Do A <- A * X  //AX2
-				S_CYCLE_2: begin 
+	    // Do A <- A * X  //AX2
+	    S_CYCLE_2: begin 
                 ld_alu_out = 1'b1; ld_a = 1'b1; // store result back into A
                 alu_select_a = 2'b00; // Select register A
                 alu_select_b = 2'b11; // Also select register X
                 alu_op = 1'b1; // Do multiply operation
             end
-				// Do A <- A + B  //Ax2 + BX
-				S_CYCLE_3: begin 
+	    // Do A <- A + B  //Ax2 + BX
+	    S_CYCLE_3: begin 
                 ld_alu_out = 1'b1; ld_a = 1'b1; // store result back into A
                 alu_select_a = 2'b00; // Select register A
                 alu_select_b = 2'b01; // Also select register B
                 alu_op = 1'b0; // Do plus operation
             end
-				// Do R <- A + C  //AX2 + BX + C
-				S_CYCLE_4: begin 
-					 ld_r = 1'b1; // store result in result register
+	    // Do R <- A + C  //AX2 + BX + C
+	    S_CYCLE_4: begin 
+		ld_r = 1'b1; // store result in result register
                 alu_select_a = 2'b00; // Select register A
                 alu_select_b = 2'b10; // Select register C
                 alu_op = 1'b0; // Do plus operation
             end
-		    // default:    // don't need default since we already made sure all of our outputs were assigned a value at the start of the always block
-		  endcase
+	    // default:    // don't need default since we already made sure all of our outputs were assigned a value at the start of the always block
+	endcase
     end // enable_signals
    
     // current_state registers
@@ -219,22 +222,22 @@ endmodule
 module datapath(
     input clk,
     input resetn,
-    input [7:0] data_in,
+    input [7:0]data_in,
     input ld_alu_out, 
     input ld_x, ld_a, ld_b, ld_c,
     input ld_r,
     input alu_op, 
-    input [1:0] alu_select_a, alu_select_b,
-    output reg [7:0] data_result
+    input [1:0]alu_select_a, alu_select_b,
+    output reg [7:0]data_result
     );
     
     // input registers
-    reg [7:0] a, b, c, x;
+    reg [7:0]a, b, c, x;
 
     // output of the alu
-    reg [7:0] alu_out;
+    reg [7:0]alu_out;
     // alu input muxes
-    reg [7:0] alu_a, alu_b;
+    reg [7:0]alu_a, alu_b;
     
     // Registers a, b, c, x with respective input logic
     always@(posedge clk) begin
