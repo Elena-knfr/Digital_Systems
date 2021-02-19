@@ -1,5 +1,5 @@
 //To derive the slower flashing rates, should use a counter, call it RateDivider, which is
-//clocked with the 50 MHz clock. The output of RateDivider can be used as part of a circuit
+//clocked with the 5 KHz clock. The output of RateDivider can be used as part of a circuit
 //to create pulses at the required rates.
 
 //Every time RateDivider has counted the appropriate
