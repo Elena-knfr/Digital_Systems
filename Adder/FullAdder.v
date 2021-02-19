@@ -3,7 +3,7 @@ module FA(a, b, cin, s, cout);
 	output s, cout;
 	
 	assign s = cin ^ a ^ b;
-	assign cout = (a & b) | (a & cin) | (b & cin);\
+	assign cout = (a & b) | (a & cin) | (b & cin);
 	
 endmodule
 
